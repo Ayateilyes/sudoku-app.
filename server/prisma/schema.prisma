@@ -1,0 +1,40 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Puzzle {
+  id            Int              @id @default(autoincrement())
+  difficulty    String           // "EASY", "MEDIUM", "HARD"
+  puzzle_data   Json             // 9x9 matrix with numbers and nulls
+  solution_data Json             // 9x9 matrix of solved numbers
+  created_at    DateTime         @default(now())
+  daily_challenges DailyChallenge[]
+
+  @@map("puzzles")
+}
+
+model DailyChallenge {
+  id         Int      @id @default(autoincrement())
+  date       String   @unique // Format: YYYY-MM-DD
+  puzzle_id  Int
+  puzzle     Puzzle   @relation(fields: [puzzle_id], references: [id], onDelete: Cascade)
+  created_at DateTime @default(now())
+
+  @@map("daily_challenge")
+}
+
+model Streak {
+  id             Int      @id @default(autoincrement())
+  nickname       String   @unique
+  current_streak Int      @default(0)
+  last_played    String?  // Format: YYYY-MM-DD
+  updated_at     DateTime @updatedAt
+
+  @@map("streaks")
+}

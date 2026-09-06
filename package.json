@@ -1,0 +1,11 @@
+{
+  "name": "sudoku-solver-daily-challenge",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Sudoku Solver & Daily Challenge (React + Framer Motion + Fastify + Prisma + Neon)",
+  "scripts": {
+    "install:all": "npm --prefix server install && npm --prefix client install",
+    "dev:server": "npm --prefix server run dev",
+    "dev:client": "npm --prefix client run dev"
+  }
+}
