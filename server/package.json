@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "tsc",
+    "build": "prisma generate && tsc",
     "start": "node dist/index.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
@@ -17,13 +17,13 @@
   "dependencies": {
     "@fastify/cors": "^10.0.2",
     "@prisma/client": "^6.4.1",
+    "@types/node": "^22.13.4",
     "dotenv": "^16.4.7",
-    "fastify": "^5.2.1"
+    "fastify": "^5.2.1",
+    "prisma": "^6.4.1",
+    "typescript": "^5.7.3"
   },
   "devDependencies": {
-    "@types/node": "^22.13.4",
-    "prisma": "^6.4.1",
-    "tsx": "^4.19.3",
-    "typescript": "^5.7.3"
+    "tsx": "^4.19.3"
   }
 }
