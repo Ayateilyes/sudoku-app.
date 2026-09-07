@@ -2,9 +2,11 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Delete } from 'lucide-react';
 import { BoardMatrix } from '../types';
+import { Language, translations } from '../utils/i18n';
 
 interface NumberPadProps {
   board: BoardMatrix;
+  lang?: Language;
   onInputNumber: (num: number) => void;
   onErase: () => void;
   disabled?: boolean;
@@ -12,10 +14,13 @@ interface NumberPadProps {
 
 export const NumberPad: React.FC<NumberPadProps> = ({
   board,
+  lang = 'de',
   onInputNumber,
   onErase,
   disabled = false,
 }) => {
+  const t = translations[lang];
+
   const digitCounts = React.useMemo(() => {
     const counts: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0 };
     for (let r = 0; r < 9; r++) {
@@ -69,11 +74,11 @@ export const NumberPad: React.FC<NumberPadProps> = ({
           transition={{ duration: 0.1 }}
           onClick={onErase}
           disabled={disabled}
-          title="Erase (Backspace / Delete)"
+          title={t.erase}
           className="flex flex-col items-center justify-center py-2 sm:py-2.5 rounded-xl border bg-slate-900/80 hover:bg-rose-500/20 border-slate-750 hover:border-rose-500/50 text-slate-300 hover:text-rose-300 shadow-sm transition-all hover:shadow-[0_0_12px_rgba(244,63,94,0.25)]"
         >
           <Delete className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
-          <span className="text-[10px] text-slate-400 -mt-0.5 font-mono">Del</span>
+          <span className="text-[10px] text-slate-400 -mt-0.5 font-mono truncate max-w-[40px]">{t.erase}</span>
         </motion.button>
       </div>
     </div>

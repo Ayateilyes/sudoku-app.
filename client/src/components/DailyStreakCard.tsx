@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Flame, Calendar, User, Edit2, Check, Grid, Sparkles, CheckCircle2 } from 'lucide-react';
 import { GameMode, StreakData } from '../types';
+import { Language, translations } from '../utils/i18n';
 
 interface DailyStreakCardProps {
   gameMode: GameMode;
   dateString: string;
   nickname: string;
   streakData: StreakData | null;
+  lang: Language;
   onSelectMode: (mode: GameMode) => void;
   onUpdateNickname: (newNickname: string) => void;
 }
@@ -17,9 +19,11 @@ export const DailyStreakCard: React.FC<DailyStreakCardProps> = ({
   dateString,
   nickname,
   streakData,
+  lang,
   onSelectMode,
   onUpdateNickname,
 }) => {
+  const t = translations[lang];
   const [isEditingNick, setIsEditingNick] = useState(false);
   const [tempNick, setTempNick] = useState(nickname);
 
@@ -47,7 +51,7 @@ export const DailyStreakCard: React.FC<DailyStreakCardProps> = ({
           }`}
         >
           <Grid className="w-3.5 h-3.5" />
-          <span>Classic Sudoku</span>
+          <span>{t.classicSudoku}</span>
         </motion.button>
 
         <motion.button
@@ -62,10 +66,10 @@ export const DailyStreakCard: React.FC<DailyStreakCardProps> = ({
           }`}
         >
           <Flame className={`w-3.5 h-3.5 ${gameMode === 'DAILY' ? 'text-amber-400' : ''}`} />
-          <span>Daily Challenge</span>
+          <span>{t.dailyChallenge}</span>
           {streakData && streakData.current_streak > 0 && (
             <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-amber-500/30 text-amber-200 font-mono">
-              {streakData.current_streak}d
+              {streakData.current_streak}{t.streakDays}
             </span>
           )}
         </motion.button>
@@ -86,7 +90,7 @@ export const DailyStreakCard: React.FC<DailyStreakCardProps> = ({
             </div>
             <div>
               <div className="flex items-center gap-1.5 font-bold text-white">
-                <span>Daily Challenge</span>
+                <span>{t.dailyChallenge}</span>
                 <Sparkles className="w-3 h-3 text-amber-400" />
               </div>
               <div className="text-[11px] text-slate-400 font-mono">{dateString}</div>
@@ -123,7 +127,7 @@ export const DailyStreakCard: React.FC<DailyStreakCardProps> = ({
                   setIsEditingNick(true);
                 }}
                 className="flex items-center gap-1 text-[11px] text-slate-400 hover:text-slate-200 bg-slate-800/80 px-2 py-1 rounded-lg border border-slate-700/60 transition-colors"
-                title="Click to edit nickname"
+                title={t.editNickname}
               >
                 <User className="w-3 h-3 text-indigo-400" />
                 <span className="font-semibold text-slate-300 max-w-[70px] truncate">{nickname}</span>
@@ -139,14 +143,14 @@ export const DailyStreakCard: React.FC<DailyStreakCardProps> = ({
             >
               <Flame className="w-3.5 h-3.5 text-amber-400" />
               <span className="font-mono">{streakData?.current_streak ?? 0}</span>
-              <span className="text-[10px] font-normal text-amber-400/80">streak</span>
+              <span className="text-[10px] font-normal text-amber-400/80">{t.streak}</span>
             </motion.div>
 
             {/* Done Today Badge */}
             {streakData?.has_played_today && (
               <div
                 className="p-1 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-400"
-                title="Completed Today!"
+                title={t.completedToday}
               >
                 <CheckCircle2 className="w-4 h-4" />
               </div>

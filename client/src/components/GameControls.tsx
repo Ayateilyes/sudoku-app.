@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { RotateCcw, Keyboard, HelpCircle, AlertTriangle, CheckCircle2, Check, Lightbulb, Clock, Footprints } from 'lucide-react';
 import { Position } from '../types';
+import { Language, translations } from '../utils/i18n';
 
 interface GameControlsProps {
   filledCount: number;
@@ -12,6 +13,7 @@ interface GameControlsProps {
   totalCells?: number;
   selectedPos: Position | null;
   isSolving?: boolean;
+  lang: Language;
   onReset: () => void;
   onHint: () => void;
 }
@@ -25,9 +27,11 @@ export const GameControls: React.FC<GameControlsProps> = ({
   totalCells = 81,
   selectedPos,
   isSolving = false,
+  lang,
   onReset,
   onHint,
 }) => {
+  const t = translations[lang];
   const [showTips, setShowTips] = React.useState(false);
 
   return (
@@ -42,7 +46,7 @@ export const GameControls: React.FC<GameControlsProps> = ({
           </div>
 
           {/* Moves */}
-          <div className="hidden sm:flex items-center gap-1 text-slate-400 font-mono text-[11px]">
+          <div className="hidden sm:flex items-center gap-1 text-slate-400 font-mono text-[11px]" title={t.moves}>
             <Footprints className="w-3.5 h-3.5 text-cyan-400" />
             <span>{movesCount}</span>
           </div>
@@ -55,12 +59,12 @@ export const GameControls: React.FC<GameControlsProps> = ({
               className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-rose-500/15 text-rose-300 border border-rose-500/30 font-medium text-[11px]"
             >
               <AlertTriangle className="w-3 h-3 text-rose-400" />
-              <span>{conflictCount} conflict{conflictCount > 1 ? 's' : ''}</span>
+              <span>{conflictCount} {conflictCount > 1 ? t.conflicts : t.conflict}</span>
             </motion.span>
           ) : filledCount === 81 ? (
             <span className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-medium text-[11px]">
               <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-              <span>Solved</span>
+              <span>{t.solved}</span>
             </span>
           ) : (
             <span className="hidden md:flex items-center gap-1 text-slate-400 text-[11px]">
@@ -85,11 +89,11 @@ export const GameControls: React.FC<GameControlsProps> = ({
             whileTap={{ scale: isSolving ? 1 : 0.95 }}
             disabled={isSolving || filledCount === 81}
             onClick={onHint}
-            title="Reveal a correct cell hint"
+            title={t.hint}
             className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <Lightbulb className="w-3.5 h-3.5 text-amber-400" />
-            <span>Hint</span>
+            <span>{t.hint}</span>
             {hintsUsed > 0 && (
               <span className="text-[10px] bg-amber-400/20 px-1 rounded-full text-amber-200 ml-0.5 font-mono">
                 {hintsUsed}
@@ -103,18 +107,18 @@ export const GameControls: React.FC<GameControlsProps> = ({
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={onReset}
-            title="Reset puzzle to initial state"
+            title={t.reset}
             className="flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700/80 text-slate-200 border border-slate-700/60 transition-colors"
           >
             <RotateCcw className="w-3.5 h-3.5 text-indigo-400" />
-            <span className="hidden sm:inline">Reset</span>
+            <span className="hidden sm:inline">{t.reset}</span>
           </motion.button>
 
           <button
             type="button"
             onClick={() => setShowTips(!showTips)}
             className="p-1.5 text-slate-400 hover:text-slate-200 rounded hover:bg-slate-800/60 transition-colors"
-            title="Toggle Controls Guide"
+            title={t.rulesTitle}
           >
             <HelpCircle className="w-4 h-4" />
           </button>
@@ -129,7 +133,8 @@ export const GameControls: React.FC<GameControlsProps> = ({
         >
           <Keyboard className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
           <div>
-            <strong className="text-slate-200">Rules & Timer:</strong> Select difficulty tabs to load puzzles . Timer and moves count your performance. Solve all 81 cells without conflicts to claim victory!
+            <strong className="text-slate-200">{t.rulesTitle} </strong>
+            {t.rulesDesc}
           </div>
         </motion.div>
       )}

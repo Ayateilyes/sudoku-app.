@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Play, Pause, FastForward, Square, Wand2, AlertCircle } from 'lucide-react';
+import { Language, translations } from '../utils/i18n';
 
 export type PlaybackSpeed = 'normal' | 'fast' | 'instant';
 
@@ -11,6 +12,7 @@ interface SolveBarProps {
   totalSteps: number;
   speed: PlaybackSpeed;
   error: string | null;
+  lang: Language;
   onSolve: () => void;
   onTogglePause: () => void;
   onSetSpeed: (speed: PlaybackSpeed) => void;
@@ -25,12 +27,15 @@ export const SolveBar: React.FC<SolveBarProps> = ({
   totalSteps,
   speed,
   error,
+  lang,
   onSolve,
   onTogglePause,
   onSetSpeed,
   onSkipToEnd,
   onCancel,
 }) => {
+  const t = translations[lang];
+
   return (
     <div className="w-full max-w-[460px] mx-auto mt-3.5">
       {/* Error Alert */}
@@ -54,7 +59,7 @@ export const SolveBar: React.FC<SolveBarProps> = ({
           className="w-full py-2.5 sm:py-3 px-4 rounded-xl font-bold text-xs sm:text-sm bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-xl shadow-indigo-600/25 flex items-center justify-center gap-2 transition-all border border-indigo-400/30 hover:shadow-indigo-500/40"
         >
           <Wand2 className="w-4 h-4 text-indigo-200" />
-          <span>Solve with Backtracking Algorithm</span>
+          <span>{t.solveWithBacktracking}</span>
         </motion.button>
       ) : (
         <motion.div
@@ -67,12 +72,12 @@ export const SolveBar: React.FC<SolveBarProps> = ({
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
               <span className="font-semibold text-cyan-300">
-                {isPaused ? 'Paused' : 'Backtracking Solver Active'}
+                {isPaused ? t.paused : t.solverActive}
               </span>
             </div>
 
             <span className="font-mono text-slate-400 text-[11px]">
-              Step <strong className="text-cyan-300 font-bold">{currentStep}</strong> / {totalSteps}
+              {t.step} <strong className="text-cyan-300 font-bold">{currentStep}</strong> / {totalSteps}
             </span>
           </div>
 
@@ -111,7 +116,7 @@ export const SolveBar: React.FC<SolveBarProps> = ({
                     : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
-                Instant
+                {t.instant}
               </button>
             </div>
 
@@ -120,7 +125,7 @@ export const SolveBar: React.FC<SolveBarProps> = ({
               <button
                 type="button"
                 onClick={onTogglePause}
-                title={isPaused ? 'Resume Playback' : 'Pause Playback'}
+                title={isPaused ? t.resumePlayback : t.pausePlayback}
                 className="p-1.5 sm:p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors"
               >
                 {isPaused ? <Play className="w-4 h-4 text-emerald-400" /> : <Pause className="w-4 h-4" />}
@@ -129,17 +134,17 @@ export const SolveBar: React.FC<SolveBarProps> = ({
               <button
                 type="button"
                 onClick={onSkipToEnd}
-                title="Finish Instantly"
+                title={t.finish}
                 className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-medium transition-colors"
               >
                 <FastForward className="w-3.5 h-3.5 text-cyan-400" />
-                <span className="hidden sm:inline">Finish</span>
+                <span className="hidden sm:inline">{t.finish}</span>
               </button>
 
               <button
                 type="button"
                 onClick={onCancel}
-                title="Stop Solving"
+                title={t.stopSolving}
                 className="p-1.5 sm:p-2 rounded-lg bg-slate-800 hover:bg-rose-950/60 text-slate-400 hover:text-rose-300 border border-slate-700 transition-colors"
               >
                 <Square className="w-3.5 h-3.5" />

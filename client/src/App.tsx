@@ -16,6 +16,7 @@ import {
 } from './types';
 import { createInitialBoard, cloneBoard, countFilledCells, findConflicts, DEFAULT_RAW_PUZZLE } from './utils/sudoku';
 import { API_BASE } from './utils/api';
+import { Language, translations, getInitialLanguage } from './utils/i18n';
 import { SudokuGrid } from './components/SudokuGrid';
 import { NumberPad } from './components/NumberPad';
 import { GameControls } from './components/GameControls';
@@ -32,6 +33,18 @@ interface HealthResponse {
 }
 
 export default function App() {
+  // Language State (Defaults to Deutsch / German)
+  const [lang, setLang] = useState<Language>(getInitialLanguage);
+  const t = translations[lang];
+
+  const handleToggleLanguage = (newLang: Language) => {
+    setLang(newLang);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('sudoku_lang', newLang);
+      document.documentElement.lang = newLang;
+    }
+  };
+
   const [board, setBoard] = useState<BoardMatrix>(() => createInitialBoard(DEFAULT_RAW_PUZZLE));
   const [initialRawBoard, setInitialRawBoard] = useState<(number | null)[][]>(DEFAULT_RAW_PUZZLE);
   const [selectedPos, setSelectedPos] = useState<Position | null>({ row: 0, col: 2 });
@@ -163,11 +176,11 @@ export default function App() {
         }
       }
     } catch {
-      setSolverError('Could not load puzzle. Please check your connection.');
+      setSolverError(lang === 'de' ? 'Rätsel konnte nicht geladen werden.' : 'Could not load puzzle. Please check your connection.');
     } finally {
       setIsLoadingPuzzle(false);
     }
-  }, []);
+  }, [lang]);
 
   // Load Daily Challenge Puzzle
   const loadDailyChallenge = useCallback(async () => {
@@ -205,11 +218,11 @@ export default function App() {
 
       fetchStreak(nickname);
     } catch {
-      setSolverError('Could not load daily challenge. Please try again.');
+      setSolverError(lang === 'de' ? 'Tägliche Herausforderung konnte nicht geladen werden.' : 'Could not load daily challenge. Please try again.');
     } finally {
       setIsLoadingPuzzle(false);
     }
-  }, [fetchStreak, nickname]);
+  }, [fetchStreak, nickname, lang]);
 
   // Initial load
   useEffect(() => {
@@ -239,12 +252,12 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ nickname }),
       });
-      const data = await res.json();
+      const data: StreakApiResponse = await res.json();
       if (data.success) {
         setStreakData({
-          nickname,
+          nickname: data.nickname,
           current_streak: data.current_streak,
-          last_played: new Date().toISOString().split('T')[0],
+          last_played: data.last_played,
           has_played_today: true,
         });
       }
@@ -255,9 +268,10 @@ export default function App() {
 
   // Check victory condition
   useEffect(() => {
-    if (!isSolving && filledCount === 81 && conflicts.size === 0 && !isVictory) {
+    if (filledCount === 81 && conflicts.size === 0 && !isSolving && !isVictory) {
       setIsVictory(true);
       setIsTimerRunning(false);
+
       if (gameMode === 'DAILY') {
         recordDailyCompletion();
       }
@@ -265,87 +279,78 @@ export default function App() {
   }, [filledCount, conflicts, isSolving, isVictory, gameMode, recordDailyCompletion]);
 
   // Cell Selection
-  const handleSelectCell = useCallback(
-    (row: number, col: number) => {
-      if (isSolving) return;
-      setSelectedPos({ row, col });
-    },
-    [isSolving]
-  );
+  const handleSelectCell = useCallback((row: number, col: number) => {
+    if (isSolving) return;
+    setSelectedPos({ row, col });
+  }, [isSolving]);
 
-  // Set number in currently selected cell
-  const handleInputNumber = useCallback(
-    (num: number) => {
-      if (isSolving || !selectedPos) return;
-      const { row, col } = selectedPos;
+  // Start timer on first user move
+  const startTimerIfNeeded = useCallback(() => {
+    if (!isTimerRunning && !isVictory) {
+      setIsTimerRunning(true);
+    }
+  }, [isTimerRunning, isVictory]);
 
-      setBoard((prev) => {
-        if (prev[row][col].isInitial) return prev;
-        const next = cloneBoard(prev);
-        const prevVal = next[row][col].value;
-        next[row][col].value = prevVal === num ? null : num;
-
-        if (prevVal !== num) {
-          setMovesCount((m) => m + 1);
-          if (!isTimerRunning) setIsTimerRunning(true);
-        }
-        return next;
-      });
-    },
-    [isSolving, selectedPos, isTimerRunning]
-  );
-
-  // Erase number in currently selected cell
-  const handleErase = useCallback(() => {
-    if (isSolving || !selectedPos) return;
+  // Input number into selected cell
+  const handleInputNumber = useCallback((num: number) => {
+    if (!selectedPos || isSolving) return;
     const { row, col } = selectedPos;
+    const currentCell = board[row][col];
+
+    if (currentCell.isInitial) return;
+
+    startTimerIfNeeded();
 
     setBoard((prev) => {
-      if (prev[row][col].isInitial) return prev;
       const next = cloneBoard(prev);
-      if (next[row][col].value !== null) {
-        next[row][col].value = null;
-        setMovesCount((m) => m + 1);
-      }
+      next[row][col].value = num;
       return next;
     });
-  }, [isSolving, selectedPos]);
 
-  // Reset current puzzle
+    setMovesCount((m) => m + 1);
+  }, [selectedPos, isSolving, board, startTimerIfNeeded]);
+
+  // Erase value from selected cell
+  const handleErase = useCallback(() => {
+    if (!selectedPos || isSolving) return;
+    const { row, col } = selectedPos;
+    const currentCell = board[row][col];
+
+    if (currentCell.isInitial || currentCell.value === null) return;
+
+    startTimerIfNeeded();
+
+    setBoard((prev) => {
+      const next = cloneBoard(prev);
+      next[row][col].value = null;
+      return next;
+    });
+
+    setMovesCount((m) => m + 1);
+  }, [selectedPos, isSolving, board, startTimerIfNeeded]);
+
+  // Reset to initial puzzle state
   const handleReset = useCallback(() => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
-    }
-    if (hintTimeoutRef.current) {
-      clearTimeout(hintTimeoutRef.current);
-      hintTimeoutRef.current = null;
-    }
-    setIsSolving(false);
-    setIsPaused(false);
-    setSolvingPos(null);
-    setHintedPos(null);
-    setHintsUsed(0);
+    if (isSolving) return;
+    setBoard(createInitialBoard(initialRawBoard));
+    setSolverError(null);
+    setIsTimerRunning(false);
     setTimerSeconds(0);
     setMovesCount(0);
-    setIsTimerRunning(false);
-    setIsVictory(false);
-    setSolverError(null);
-    setBoard(createInitialBoard(initialRawBoard));
-  }, [initialRawBoard]);
+    setHintsUsed(0);
+    setHintedPos(null);
+  }, [initialRawBoard, isSolving]);
 
-  // Request Hint from backend
+  // Intelligent Hint Fetcher
   const handleGetHint = useCallback(async () => {
     if (isSolving) return;
-    setSolverError(null);
 
-    if (conflicts.size > 0) {
-      setSolverError('Cannot provide hint: Resolve board conflicts first.');
-      return;
-    }
+    setSolverError(null);
+    startTimerIfNeeded();
+
+    const rawBoard = board.map((row) => row.map((cell) => cell.value));
 
     try {
-      const rawBoard = board.map((row) => row.map((cell) => cell.value));
       const res = await fetch(`${API_BASE}/api/hint`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -358,7 +363,7 @@ export default function App() {
       const data: HintApiResponse = await res.json();
 
       if (!res.ok || !data.success || !data.hint) {
-        setSolverError(data.error || 'Failed to generate hint.');
+        setSolverError(data.error || t.errHintNotFound);
         return;
       }
 
@@ -372,47 +377,24 @@ export default function App() {
 
       setSelectedPos({ row, col });
       setHintedPos({ row, col });
-      setHintsUsed((prev) => prev + 1);
+      setHintsUsed((h) => h + 1);
       setMovesCount((m) => m + 1);
-      if (!isTimerRunning) setIsTimerRunning(true);
 
       if (hintTimeoutRef.current) {
-        clearTimeout(hintTimeoutRef.current);
+        window.clearTimeout(hintTimeoutRef.current);
       }
       hintTimeoutRef.current = window.setTimeout(() => {
         setHintedPos(null);
       }, 2500);
     } catch {
-      setSolverError('Could not retrieve hint. Please try again.');
+      setSolverError(t.errNetworkSolver);
     }
-  }, [board, selectedPos, isSolving, conflicts, isTimerRunning]);
+  }, [board, selectedPos, isSolving, startTimerIfNeeded, t]);
 
-  // Apply full final solution
-  const applyFinalSolution = useCallback(() => {
-    if (!solutionRef.current) return;
-    const sol = solutionRef.current;
-    setBoard((prev) =>
-      prev.map((rowArr, r) =>
-        rowArr.map((cell, c) => ({
-          ...cell,
-          value: sol[r][c],
-        }))
-      )
-    );
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
-    }
-    setIsSolving(false);
-    setIsPaused(false);
-    setSolvingPos(null);
-    setIsTimerRunning(false);
-  }, []);
-
-  // Cancel solving
+  // Cancel Solver Playback
   const handleCancelSolving = useCallback(() => {
     if (timerRef.current) {
-      clearInterval(timerRef.current);
+      window.clearTimeout(timerRef.current);
       timerRef.current = null;
     }
     setIsSolving(false);
@@ -420,85 +402,93 @@ export default function App() {
     setSolvingPos(null);
   }, []);
 
-  // Playback step runner
-  const runPlayback = useCallback((startIndex: number) => {
-    let index = startIndex;
-
+  // Apply final solved board instantly
+  const applyFinalSolution = useCallback(() => {
     if (timerRef.current) {
-      clearInterval(timerRef.current);
+      window.clearTimeout(timerRef.current);
+      timerRef.current = null;
     }
 
-    const getDelay = () => {
-      if (speedRef.current === 'fast') return 8;
-      return 26;
-    };
-
-    const tick = () => {
-      if (isPausedRef.current) return;
-
-      const steps = stepsRef.current;
-      if (index >= steps.length) {
-        applyFinalSolution();
-        return;
-      }
-
-      const step = steps[index];
+    if (solutionRef.current) {
+      const finalSolution = solutionRef.current;
       setBoard((prev) => {
         const next = cloneBoard(prev);
-        if (!next[step.row][step.col].isInitial) {
-          next[step.row][step.col].value = step.value;
+        for (let r = 0; r < 9; r++) {
+          for (let c = 0; c < 9; c++) {
+            next[r][c].value = finalSolution[r][c];
+          }
         }
         return next;
       });
+    }
 
-      setSolvingPos({ row: step.row, col: step.col });
-      setCurrentStepIndex(index + 1);
-      index++;
-    };
+    setIsSolving(false);
+    setIsPaused(false);
+    setSolvingPos(null);
+    setCurrentStepIndex(totalSteps);
+  }, [totalSteps]);
 
-    timerRef.current = window.setInterval(tick, getDelay());
-  }, [applyFinalSolution]);
-
-  // Adjust speed during playback
-  const handleSetSpeed = useCallback(
-    (newSpeed: PlaybackSpeed) => {
-      setSpeed(newSpeed);
-      if (newSpeed === 'instant') {
-        applyFinalSolution();
-        return;
-      }
-      if (isSolving && !isPaused) {
-        runPlayback(currentStepIndex);
-      }
-    },
-    [applyFinalSolution, isSolving, isPaused, currentStepIndex, runPlayback]
-  );
-
-  // Toggle Pause/Resume
-  const handleTogglePause = useCallback(() => {
-    setIsPaused((prev) => {
-      const next = !prev;
-      if (!next) {
-        runPlayback(currentStepIndex);
-      } else if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
-      }
-      return next;
-    });
-  }, [currentStepIndex, runPlayback]);
-
-  // Trigger Solver API
-  const handleSolve = async () => {
-    setSolverError(null);
-
-    if (conflicts.size > 0) {
-      setSolverError('Cannot solve: Board contains conflicts. Please fix them first.');
+  // Run next step of playback
+  const runPlayback = useCallback((stepIdx: number) => {
+    if (stepIdx >= stepsRef.current.length) {
+      applyFinalSolution();
       return;
     }
 
+    if (isPausedRef.current) return;
+
+    const step = stepsRef.current[stepIdx];
+    setCurrentStepIndex(stepIdx + 1);
+    setSolvingPos({ row: step.row, col: step.col });
+
+    setBoard((prev) => {
+      const next = cloneBoard(prev);
+      next[step.row][step.col].value = step.value;
+      return next;
+    });
+
+    const delay = speedRef.current === 'fast' ? 15 : 60;
+    timerRef.current = window.setTimeout(() => {
+      runPlayback(stepIdx + 1);
+    }, delay);
+  }, [applyFinalSolution]);
+
+  // Toggle pause/resume during playback
+  const handleTogglePause = useCallback(() => {
+    if (!isSolving) return;
+
+    if (isPaused) {
+      setIsPaused(false);
+      isPausedRef.current = false;
+      runPlayback(currentStepIndex);
+    } else {
+      setIsPaused(true);
+      isPausedRef.current = true;
+      if (timerRef.current) {
+        window.clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+    }
+  }, [isSolving, isPaused, currentStepIndex, runPlayback]);
+
+  // Change playback speed
+  const handleSetSpeed = useCallback((newSpeed: PlaybackSpeed) => {
+    setSpeed(newSpeed);
+    speedRef.current = newSpeed;
+
+    if (newSpeed === 'instant' && isSolving) {
+      applyFinalSolution();
+    }
+  }, [isSolving, applyFinalSolution]);
+
+  // Trigger Backtracking Solver
+  const handleSolve = async () => {
+    if (isSolving) return;
+
+    setSolverError(null);
+    const rawBoard = board.map((row) => row.map((cell) => cell.value));
+
     try {
-      const rawBoard = board.map((row) => row.map((cell) => cell.value));
       const res = await fetch(`${API_BASE}/api/solve`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -508,7 +498,7 @@ export default function App() {
       const data: SolveApiResponse = await res.json();
 
       if (!res.ok || !data.success || !data.solution) {
-        setSolverError(data.error || 'Failed to solve Sudoku puzzle.');
+        setSolverError(data.error || t.errSolveFailed);
         return;
       }
 
@@ -526,7 +516,7 @@ export default function App() {
         runPlayback(0);
       }
     } catch {
-      setSolverError('Network error. Could not connect to puzzle solver.');
+      setSolverError(t.errNetworkSolver);
     }
   };
 
@@ -587,53 +577,87 @@ export default function App() {
         className="w-full max-w-xl flex flex-col"
       >
         {/* Top Header Card */}
-        <header className="mb-4 p-4 rounded-2xl bg-slate-900/80 backdrop-blur-xl border border-slate-800/90 shadow-2xl flex items-center justify-between">
+        <header className="mb-4 p-4 rounded-2xl bg-slate-900/80 backdrop-blur-xl border border-slate-800/90 shadow-2xl flex items-center justify-between gap-2">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600/30 to-purple-600/30 border border-indigo-500/40 flex items-center justify-center text-indigo-400 shadow-md shadow-indigo-950/50">
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
               <h1 className="text-lg sm:text-xl font-black tracking-tight bg-gradient-to-r from-white via-indigo-100 to-indigo-300 bg-clip-text text-transparent">
-                Sudoku Master
+                {t.appTitle}
               </h1>
               <p className="text-xs text-slate-400 flex items-center gap-1.5">
                 {gameMode === 'DAILY' ? (
                   <>
                     <Flame className="w-3.5 h-3.5 text-amber-400" />
-                    <span>Daily Global Challenge</span>
+                    <span>{t.dailyGlobalChallenge}</span>
                   </>
                 ) : (
                   <>
                     <span className="w-2 h-2 rounded-full bg-indigo-400 inline-block"></span>
-                    <span>Interactive Puzzles & Solver</span>
+                    <span>{t.interactivePuzzlesAndSolver}</span>
                   </>
                 )}
               </p>
             </div>
           </div>
 
-          {/* Online Status Pill */}
-          <div className="flex items-center gap-1.5 text-xs">
-            {backendHealth?.status === 'ok' ? (
-              <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium">
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                <span>Online</span>
-              </span>
-            ) : (
-              <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 border border-slate-700">
-                <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-                <span>Connecting...</span>
-              </span>
-            )}
+          {/* Right side: Language switcher & Online status */}
+          <div className="flex items-center gap-2">
+            {/* Language Switcher Pill */}
+            <div className="flex items-center gap-0.5 bg-slate-950/90 p-1 rounded-xl border border-slate-800 shadow-inner">
+              <button
+                type="button"
+                onClick={() => handleToggleLanguage('de')}
+                className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold transition-all ${
+                  lang === 'de'
+                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                }`}
+                title="Deutsch (Standard)"
+              >
+                <span>🇩🇪</span>
+                <span>DE</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleToggleLanguage('en')}
+                className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold transition-all ${
+                  lang === 'en'
+                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                }`}
+                title="English"
+              >
+                <span>🇬🇧</span>
+                <span>EN</span>
+              </button>
+            </div>
+
+            {/* Online Status Pill */}
+            <div className="hidden sm:flex items-center gap-1.5 text-xs">
+              {backendHealth?.status === 'ok' ? (
+                <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>{t.online}</span>
+                </span>
+              ) : (
+                <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 border border-slate-700">
+                  <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                  <span>{t.connecting}</span>
+                </span>
+              )}
+            </div>
           </div>
         </header>
 
         {/* Daily Challenge vs Classic Selector & Streak Badge */}
         <DailyStreakCard
           gameMode={gameMode}
-          dateString={dailyDate || new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+          dateString={dailyDate || new Date().toLocaleDateString(lang === 'de' ? 'de-DE' : 'en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
           nickname={nickname}
           streakData={streakData}
+          lang={lang}
           onSelectMode={handleSelectMode}
           onUpdateNickname={handleUpdateNickname}
         />
@@ -644,6 +668,7 @@ export default function App() {
             currentDifficulty={difficulty}
             isLoading={isLoadingPuzzle}
             isSolving={isSolving}
+            lang={lang}
             onSelectDifficulty={(diff) => loadClassicPuzzle(diff)}
             onNewPuzzle={() => loadClassicPuzzle(difficulty)}
           />
@@ -658,6 +683,7 @@ export default function App() {
           timeFormatted={formatTime(timerSeconds)}
           selectedPos={selectedPos}
           isSolving={isSolving}
+          lang={lang}
           onReset={handleReset}
           onHint={handleGetHint}
         />
@@ -680,6 +706,7 @@ export default function App() {
           totalSteps={totalSteps}
           speed={speed}
           error={solverError}
+          lang={lang}
           onSolve={handleSolve}
           onTogglePause={handleTogglePause}
           onSetSpeed={handleSetSpeed}
@@ -690,6 +717,7 @@ export default function App() {
         {/* Number Pad for Input & Erase */}
         <NumberPad
           board={board}
+          lang={lang}
           onInputNumber={handleInputNumber}
           onErase={handleErase}
           disabled={isSolving || isVictory}
@@ -704,6 +732,7 @@ export default function App() {
           timeFormatted={formatTime(timerSeconds)}
           movesCount={movesCount}
           hintsUsed={hintsUsed}
+          lang={lang}
           onNewGame={() => (gameMode === 'DAILY' ? handleSelectMode('CLASSIC') : loadClassicPuzzle(difficulty))}
           onClose={() => setIsVictory(false)}
         />
@@ -712,10 +741,10 @@ export default function App() {
         <footer className="mt-6 p-3 rounded-xl bg-slate-900/40 border border-slate-800/60 text-center text-xs text-slate-500 flex items-center justify-between">
           <span className="flex items-center gap-1.5 text-[11px]">
             <ShieldCheck className="w-3.5 h-3.5 text-indigo-400" />
-            Designed for daily brain training & puzzle mastery
+            {t.footerTagline}
           </span>
           <span className="text-[11px] text-slate-500 font-medium">
-            Sudoku Master
+            {t.appTitle}
           </span>
         </footer>
       </motion.div>

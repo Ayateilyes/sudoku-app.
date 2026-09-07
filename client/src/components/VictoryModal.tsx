@@ -2,6 +2,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trophy, Clock, Footprints, Lightbulb, Sparkles, ArrowRight, X, Flame } from 'lucide-react';
 import { Difficulty } from '../types';
+import { Language, translations } from '../utils/i18n';
 
 interface VictoryModalProps {
   isOpen: boolean;
@@ -11,6 +12,7 @@ interface VictoryModalProps {
   timeFormatted: string;
   movesCount: number;
   hintsUsed: number;
+  lang: Language;
   onNewGame: () => void;
   onClose: () => void;
 }
@@ -23,9 +25,22 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
   timeFormatted,
   movesCount,
   hintsUsed,
+  lang,
   onNewGame,
   onClose,
 }) => {
+  const t = translations[lang];
+
+  const diffLabel =
+    difficulty === 'EASY'
+      ? t.easy
+      : difficulty === 'MEDIUM'
+      ? t.medium
+      : t.hard;
+
+  const classicDesc = t.victoryClassicDesc.replace('{difficulty}', diffLabel);
+  const streakBanner = t.currentStreakBanner.replace('{count}', streakCount.toString());
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -61,13 +76,11 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
             </motion.div>
 
             <h2 className="text-2xl font-black tracking-tight text-white mb-1 flex items-center justify-center gap-2">
-              {isDaily ? 'Daily Challenge Complete!' : 'Puzzle Completed!'}
+              {isDaily ? t.victoryDailyTitle : t.victoryClassicTitle}
               <Sparkles className="w-5 h-5 text-amber-400" />
             </h2>
             <p className="text-xs text-slate-400 mb-5">
-              {isDaily
-                ? "You've successfully solved today's fixed challenge puzzle!"
-                : `You cracked the ${difficulty} Sudoku grid!`}
+              {isDaily ? t.victoryDailyDesc : classicDesc}
             </p>
 
             {/* Streak Callout Banner (if Daily) */}
@@ -78,7 +91,7 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
                 className="mb-5 p-3 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center gap-2 text-amber-300 font-bold"
               >
                 <Flame className="w-5 h-5 text-amber-400 animate-pulse" />
-                <span>Current Streak: {streakCount} Days!</span>
+                <span>{streakBanner}</span>
               </motion.div>
             )}
 
@@ -86,19 +99,19 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
             <div className="grid grid-cols-3 gap-2.5 mb-6">
               <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80 flex flex-col items-center">
                 <Clock className="w-4 h-4 text-indigo-400 mb-1" />
-                <span className="text-[11px] text-slate-400">Time</span>
+                <span className="text-[11px] text-slate-400">{t.time}</span>
                 <span className="font-mono font-bold text-sm text-slate-200">{timeFormatted}</span>
               </div>
 
               <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80 flex flex-col items-center">
                 <Footprints className="w-4 h-4 text-cyan-400 mb-1" />
-                <span className="text-[11px] text-slate-400">Moves</span>
+                <span className="text-[11px] text-slate-400">{t.moves}</span>
                 <span className="font-mono font-bold text-sm text-slate-200">{movesCount}</span>
               </div>
 
               <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80 flex flex-col items-center">
                 <Lightbulb className="w-4 h-4 text-amber-400 mb-1" />
-                <span className="text-[11px] text-slate-400">Hints</span>
+                <span className="text-[11px] text-slate-400">{t.hints}</span>
                 <span className="font-mono font-bold text-sm text-slate-200">{hintsUsed}</span>
               </div>
             </div>
@@ -111,7 +124,7 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
               onClick={onNewGame}
               className="w-full py-3 px-4 rounded-xl font-semibold text-sm bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-lg shadow-indigo-500/30 flex items-center justify-center gap-2 border border-indigo-400/30 transition-all"
             >
-              <span>{isDaily ? 'Back to Classic Puzzles' : 'Play Another Puzzle'}</span>
+              <span>{isDaily ? t.backToClassic : t.playAnother}</span>
               <ArrowRight className="w-4 h-4" />
             </motion.button>
           </motion.div>
