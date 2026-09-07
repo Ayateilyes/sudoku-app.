@@ -30,6 +30,21 @@ function getYesterdayDateString(): string {
   return d.toISOString().split('T')[0];
 }
 
+// Root route for API welcome & status
+server.get('/', async (_request, _reply) => {
+  return {
+    service: 'Sudoku API',
+    status: 'online',
+    version: '1.0.0',
+    endpoints: {
+      health: '/api/health',
+      daily: '/api/daily',
+      random_puzzle: '/api/puzzles/random?difficulty=EASY',
+      streak: '/api/streak?nickname=Player1'
+    }
+  };
+});
+
 // Health check endpoint
 server.get('/api/health', async (_request, _reply) => {
   return {
