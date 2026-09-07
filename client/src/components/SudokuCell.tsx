@@ -11,6 +11,7 @@ interface SudokuCellProps {
   isSolvingActive?: boolean;
   isHinted?: boolean;
   onSelect: (row: number, col: number) => void;
+  onWheelCell?: (row: number, col: number, direction: 'up' | 'down') => void;
 }
 
 export const SudokuCell: React.FC<SudokuCellProps> = React.memo(({
@@ -22,6 +23,7 @@ export const SudokuCell: React.FC<SudokuCellProps> = React.memo(({
   isSolvingActive = false,
   isHinted = false,
   onSelect,
+  onWheelCell,
 }) => {
   const { row, col, value, isInitial } = cell;
 
@@ -32,7 +34,7 @@ export const SudokuCell: React.FC<SudokuCellProps> = React.memo(({
   const topBorder = row === 0 ? 'border-t border-t-slate-700/60' : '';
 
   // Background and priority styling
-  let bgClass = 'bg-slate-900/45 hover:bg-slate-800/40';
+  let bgClass = 'bg-slate-900/45 hover:bg-slate-800/50';
   let textClass = isInitial
     ? 'font-extrabold text-indigo-300 drop-shadow-[0_0_8px_rgba(99,102,241,0.2)]'
     : 'font-semibold text-slate-100';
@@ -54,11 +56,19 @@ export const SudokuCell: React.FC<SudokuCellProps> = React.memo(({
     bgClass = 'bg-slate-800/45';
   }
 
+  // Mouse wheel roulette handler
+  const handleWheel = (e: React.WheelEvent) => {
+    if (isInitial || isSolvingActive || !onWheelCell) return;
+    e.preventDefault();
+    onWheelCell(row, col, e.deltaY < 0 ? 'up' : 'down');
+  };
+
   return (
     <motion.button
       type="button"
       whileTap={{ scale: 0.94 }}
-      // Strictly transform and opacity animations
+      onWheel={handleWheel}
+      // Strictly GPU-accelerated transform & opacity animations
       animate={
         hasConflict
           ? { x: [0, -6, 6, -5, 5, -2, 2, 0], opacity: 1 }
@@ -74,14 +84,15 @@ export const SudokuCell: React.FC<SudokuCellProps> = React.memo(({
       }}
       onClick={() => onSelect(row, col)}
       aria-label={`Row ${row + 1}, Column ${col + 1}${value ? `, Value ${value}` : ', Empty'}${hasConflict ? ', Conflict' : ''}${isHinted ? ', Hinted' : ''}`}
-      className={`relative aspect-square flex items-center justify-center select-none text-base sm:text-xl md:text-2xl transition-colors duration-150 focus:outline-none ${rightBorder} ${bottomBorder} ${leftBorder} ${topBorder} ${bgClass} ${textClass}`}
+      className={`relative aspect-square flex items-center justify-center select-none text-base sm:text-xl md:text-2xl transition-colors duration-150 focus:outline-none cursor-pointer ${rightBorder} ${bottomBorder} ${leftBorder} ${topBorder} ${bgClass} ${textClass}`}
     >
       {value !== null ? (
         <motion.span
           key={`${row}-${col}-${value}`}
-          initial={{ opacity: 0, scale: 0.7 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.12 }}
+          initial={{ opacity: 0, y: 7, scale: 0.85 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.12, ease: 'easeOut' }}
+          className="inline-block"
         >
           {value}
         </motion.span>

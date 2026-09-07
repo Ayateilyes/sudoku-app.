@@ -291,6 +291,39 @@ export default function App() {
     }
   }, [isTimerRunning, isVictory]);
 
+  // Mouse wheel scroll roulette handler
+  const handleWheelCell = useCallback((row: number, col: number, direction: 'up' | 'down') => {
+    if (isSolving) return;
+    const currentCell = board[row][col];
+    if (currentCell.isInitial) return;
+
+    startTimerIfNeeded();
+    setSelectedPos({ row, col });
+
+    setBoard((prev) => {
+      const next = cloneBoard(prev);
+      const currVal = next[row][col].value;
+      let nextVal: number | null = null;
+
+      if (direction === 'up') {
+        // Roll up: empty -> 1 -> 2 -> ... -> 9 -> empty
+        if (currVal === null) nextVal = 1;
+        else if (currVal >= 9) nextVal = null;
+        else nextVal = currVal + 1;
+      } else {
+        // Roll down: empty -> 9 -> 8 -> ... -> 1 -> empty
+        if (currVal === null) nextVal = 9;
+        else if (currVal <= 1) nextVal = null;
+        else nextVal = currVal - 1;
+      }
+
+      next[row][col].value = nextVal;
+      return next;
+    });
+
+    setMovesCount((m) => m + 1);
+  }, [isSolving, board, startTimerIfNeeded]);
+
   // Input number into selected cell
   const handleInputNumber = useCallback((num: number) => {
     if (!selectedPos || isSolving) return;
@@ -609,7 +642,7 @@ export default function App() {
               <button
                 type="button"
                 onClick={() => handleToggleLanguage('de')}
-                className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold transition-all ${
+                className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
                   lang === 'de'
                     ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
                     : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
@@ -622,7 +655,7 @@ export default function App() {
               <button
                 type="button"
                 onClick={() => handleToggleLanguage('en')}
-                className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold transition-all ${
+                className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
                   lang === 'en'
                     ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
                     : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
@@ -696,7 +729,21 @@ export default function App() {
           solvingPos={solvingPos}
           hintedPos={hintedPos}
           onSelectCell={handleSelectCell}
+          onWheelCell={handleWheelCell}
         />
+
+        {/* Interactive Scroll Wheel Roulette Game Effect Pill */}
+        <div className="mt-2.5 flex items-center justify-center">
+          <motion.div
+            whileHover={{ scale: 1.03 }}
+            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900/80 border border-indigo-500/25 text-[11px] text-slate-300 shadow-sm backdrop-blur-md cursor-default"
+            title={t.rouletteTooltip}
+          >
+            <span className="text-xs">🎡</span>
+            <span className="font-semibold text-indigo-300">{t.rouletteBadge}</span>
+            <span className="text-[10px] text-slate-400 hidden sm:inline">• {t.rouletteTooltip}</span>
+          </motion.div>
+        </div>
 
         {/* Solver Playback Bar */}
         <SolveBar

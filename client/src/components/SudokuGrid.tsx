@@ -10,6 +10,7 @@ interface SudokuGridProps {
   solvingPos?: Position | null;
   hintedPos?: Position | null;
   onSelectCell: (row: number, col: number) => void;
+  onWheelCell?: (row: number, col: number, direction: 'up' | 'down') => void;
 }
 
 export const SudokuGrid: React.FC<SudokuGridProps> = ({
@@ -19,6 +20,7 @@ export const SudokuGrid: React.FC<SudokuGridProps> = ({
   solvingPos = null,
   hintedPos = null,
   onSelectCell,
+  onWheelCell,
 }) => {
   const selectedCell = selectedPos ? board[selectedPos.row][selectedPos.col] : null;
   const selectedVal = selectedCell ? selectedCell.value : null;
@@ -63,6 +65,7 @@ export const SudokuGrid: React.FC<SudokuGridProps> = ({
                   isSolvingActive={isSolvingActive}
                   isHinted={isHinted}
                   onSelect={onSelectCell}
+                  onWheelCell={onWheelCell}
                 />
               );
             })

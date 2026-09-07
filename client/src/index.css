@@ -11,9 +11,9 @@
     @apply bg-slate-950 text-slate-100 font-sans min-h-screen antialiased;
     background-color: #030712;
     background-image:
-      radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.14) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, rgba(217, 70, 239, 0.08) 0px, transparent 45%),
-      radial-gradient(at 50% 100%, rgba(56, 189, 248, 0.08) 0px, transparent 55%);
+      radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.16) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(217, 70, 239, 0.10) 0px, transparent 45%),
+      radial-gradient(at 50% 100%, rgba(56, 189, 248, 0.10) 0px, transparent 55%);
     background-attachment: fixed;
   }
 }
@@ -31,18 +31,53 @@
   -webkit-backdrop-filter: blur(8px);
 }
 
-/* Custom subtle scrollbar */
+/* ========================================================
+   Cyberpunk / Arcade Gaming Neon Scrollbar ("Scroll Roulette")
+   ======================================================== */
+html {
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: #8b5cf6 #050814;
+}
+
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 10px;
+  height: 10px;
 }
+
 ::-webkit-scrollbar-track {
-  background: #090d16;
+  background: #050814;
+  border-left: 1px solid rgba(99, 102, 241, 0.2);
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.9);
 }
+
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: linear-gradient(180deg, #6366f1 0%, #8b5cf6 30%, #d946ef 65%, #06b6d4 100%);
   border-radius: 9999px;
+  border: 2px solid #070c1b;
+  box-shadow: 
+    0 0 12px rgba(99, 102, 241, 0.65),
+    0 0 22px rgba(217, 70, 239, 0.45),
+    inset 0 0 6px rgba(255, 255, 255, 0.4);
+  transition: all 0.25s ease-in-out;
 }
+
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: linear-gradient(180deg, #818cf8 0%, #a855f7 30%, #ec4899 65%, #22d3ee 100%);
+  border: 1.5px solid #1e1b4b;
+  box-shadow: 
+    0 0 18px rgba(129, 140, 248, 0.95),
+    0 0 32px rgba(236, 72, 153, 0.75),
+    inset 0 0 8px rgba(255, 255, 255, 0.7);
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: linear-gradient(180deg, #ec4899 0%, #06b6d4 100%);
+  box-shadow: 
+    0 0 25px rgba(6, 182, 212, 1),
+    0 0 40px rgba(236, 72, 153, 0.9);
+}
+
+::-webkit-scrollbar-corner {
+  background: #050814;
 }

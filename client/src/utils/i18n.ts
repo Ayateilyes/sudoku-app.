@@ -12,6 +12,10 @@ export const translations = {
     // Language Toggle
     langButton: 'Sprache wechseln',
 
+    // Roulette effect
+    rouletteBadge: 'Mausrad-Roulette aktiv',
+    rouletteTooltip: 'Drehe das Mausrad über einem Feld, um Zahlen wie im Roulette durchzuschalten',
+
     // Game modes
     classicSudoku: 'Klassisches Sudoku',
     dailyChallenge: 'Tägliche Herausforderung',
@@ -81,6 +85,10 @@ export const translations = {
     // Language Toggle
     langButton: 'Change language',
 
+    // Roulette effect
+    rouletteBadge: 'Scroll Roulette Active',
+    rouletteTooltip: 'Spin mouse wheel over any cell to cycle numbers like a roulette wheel',
+
     // Game modes
     classicSudoku: 'Classic Sudoku',
     dailyChallenge: 'Daily Challenge',
@@ -147,6 +155,5 @@ export function getInitialLanguage(): Language {
   if (saved === 'de' || saved === 'en') {
     return saved;
   }
-  // Default to Deutsch as requested
   return 'de';
 }
