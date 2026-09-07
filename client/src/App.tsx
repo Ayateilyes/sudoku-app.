@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, CheckCircle2, ShieldCheck, Flame, ExternalLink, Code2 } from 'lucide-react';
+import { Sparkles, ShieldCheck, Flame, ExternalLink } from 'lucide-react';
 import {
   BoardMatrix,
   Position,
@@ -38,13 +38,6 @@ function LinkedInIcon({ className = 'w-4 h-4' }: { className?: string }) {
   );
 }
 
-interface HealthResponse {
-  status: string;
-  timestamp: string;
-  service: string;
-  version: string;
-}
-
 export default function App() {
   // Language State (Defaults to Deutsch / German)
   const [lang, setLang] = useState<Language>(getInitialLanguage);
@@ -61,7 +54,6 @@ export default function App() {
   const [board, setBoard] = useState<BoardMatrix>(() => createInitialBoard(DEFAULT_RAW_PUZZLE));
   const [initialRawBoard, setInitialRawBoard] = useState<(number | null)[][]>(DEFAULT_RAW_PUZZLE);
   const [selectedPos, setSelectedPos] = useState<Position | null>({ row: 0, col: 2 });
-  const [backendHealth, setBackendHealth] = useState<HealthResponse | null>(null);
 
   // Mode and Daily/Streak state
   const [gameMode, setGameMode] = useState<GameMode>('CLASSIC');
@@ -103,14 +95,6 @@ export default function App() {
 
   isPausedRef.current = isPaused;
   speedRef.current = speed;
-
-  // Check Backend Health
-  useEffect(() => {
-    fetch(`${API_BASE}/api/health`)
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => setBackendHealth(data))
-      .catch(() => setBackendHealth(null));
-  }, []);
 
   // Timer Tick Effect
   useEffect(() => {
@@ -319,12 +303,10 @@ export default function App() {
       let nextVal: number | null = null;
 
       if (direction === 'up') {
-        // Roll up: empty -> 1 -> 2 -> ... -> 9 -> empty
         if (currVal === null) nextVal = 1;
         else if (currVal >= 9) nextVal = null;
         else nextVal = currVal + 1;
       } else {
-        // Roll down: empty -> 9 -> 8 -> ... -> 1 -> empty
         if (currVal === null) nextVal = 9;
         else if (currVal <= 1) nextVal = null;
         else nextVal = currVal - 1;
@@ -623,9 +605,10 @@ export default function App() {
         className="w-full max-w-xl flex flex-col"
       >
         {/* Top Header Card */}
-        <header className="mb-4 p-4 rounded-2xl bg-slate-900/80 backdrop-blur-xl border border-slate-800/90 shadow-2xl flex items-center justify-between gap-2">
+        <header className="mb-4 p-3.5 sm:p-4 rounded-2xl bg-slate-900/85 backdrop-blur-xl border border-slate-800/90 shadow-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          {/* Left: App Title & Subtitle */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600/30 to-purple-600/30 border border-indigo-500/40 flex items-center justify-center text-indigo-400 shadow-md shadow-indigo-950/50">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600/30 to-purple-600/30 border border-indigo-500/40 flex items-center justify-center text-indigo-400 shadow-md shadow-indigo-950/50 shrink-0">
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
@@ -648,14 +631,39 @@ export default function App() {
             </div>
           </div>
 
-          {/* Right side: Language switcher & Online status */}
-          <div className="flex items-center gap-2">
+          {/* TOP RIGHT: Developed by Ayyat Ilyes (LinkedIn) + Language Switcher */}
+          <div className="flex items-center gap-2 justify-end shrink-0 self-end sm:self-center">
+            {/* Attractive Developer Button (LinkedIn) */}
+            <motion.a
+              href="https://www.linkedin.com/in/ayyat-ilyes/?locale=de-DE"
+              target="_blank"
+              rel="noopener noreferrer"
+              whileHover={{ scale: 1.05, y: -1 }}
+              whileTap={{ scale: 0.96 }}
+              className="group flex items-center gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl bg-gradient-to-r from-[#0A66C2]/20 via-slate-900 to-indigo-900/30 hover:from-[#0A66C2]/35 hover:to-indigo-800/40 border border-[#0A66C2]/50 hover:border-blue-400 shadow-md shadow-blue-950/40 transition-all cursor-pointer"
+              title={`${t.developedBy} Ayyat Ilyes - ${t.linkedinButton}`}
+            >
+              <div className="w-5 h-5 rounded-md bg-[#0A66C2] flex items-center justify-center text-white shadow-sm shadow-blue-500/60 group-hover:scale-110 transition-transform shrink-0">
+                <LinkedInIcon className="w-3 h-3" />
+              </div>
+              <div className="flex flex-col text-left">
+                <span className="text-[9px] text-blue-300 font-medium leading-none flex items-center gap-1">
+                  <span>{t.developedBy}</span>
+                  <span className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse"></span>
+                </span>
+                <span className="text-xs font-bold text-white group-hover:text-blue-200 transition-colors leading-tight">
+                  Ayyat Ilyes
+                </span>
+              </div>
+              <ExternalLink className="w-3 h-3 text-blue-300/80 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+            </motion.a>
+
             {/* Language Switcher Pill */}
             <div className="flex items-center gap-0.5 bg-slate-950/90 p-1 rounded-xl border border-slate-800 shadow-inner">
               <button
                 type="button"
                 onClick={() => handleToggleLanguage('de')}
-                className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold transition-all ${
                   lang === 'de'
                     ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
                     : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
@@ -668,7 +676,7 @@ export default function App() {
               <button
                 type="button"
                 onClick={() => handleToggleLanguage('en')}
-                className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold transition-all ${
                   lang === 'en'
                     ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
                     : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
@@ -678,21 +686,6 @@ export default function App() {
                 <span>🇬🇧</span>
                 <span>EN</span>
               </button>
-            </div>
-
-            {/* Online Status Pill */}
-            <div className="hidden sm:flex items-center gap-1.5 text-xs">
-              {backendHealth?.status === 'ok' ? (
-                <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>{t.online}</span>
-                </span>
-              ) : (
-                <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 border border-slate-700">
-                  <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-                  <span>{t.connecting}</span>
-                </span>
-              )}
             </div>
           </div>
         </header>
@@ -797,44 +790,8 @@ export default function App() {
           onClose={() => setIsVictory(false)}
         />
 
-        {/* Developer Credit & LinkedIn Connect Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15, duration: 0.35 }}
-          className="mt-6 p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-slate-900/90 via-indigo-950/40 to-slate-900/90 backdrop-blur-xl border border-indigo-500/30 shadow-xl shadow-indigo-950/40 flex flex-col sm:flex-row items-center justify-between gap-3"
-        >
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500/25 via-purple-500/20 to-pink-500/25 border border-indigo-400/40 flex items-center justify-center text-indigo-300 shadow-md shadow-indigo-950/50">
-              <Code2 className="w-5 h-5 text-indigo-400" />
-            </div>
-            <div className="text-center sm:text-left">
-              <div className="text-[11px] text-indigo-300/80 font-medium flex items-center justify-center sm:justify-start gap-1.5">
-                <span>{t.developedBy}</span>
-                <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-              </div>
-              <div className="text-sm font-black text-white tracking-wide">
-                Ayyat Ilyes
-              </div>
-            </div>
-          </div>
-
-          <motion.a
-            href="https://www.linkedin.com/in/ayyat-ilyes/?locale=de-DE"
-            target="_blank"
-            rel="noopener noreferrer"
-            whileHover={{ scale: 1.05, y: -1 }}
-            whileTap={{ scale: 0.96 }}
-            className="group relative inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-[#0A66C2] via-indigo-600 to-[#0A66C2] hover:from-[#0077B5] hover:to-indigo-500 border border-blue-400/40 shadow-lg shadow-blue-600/30 hover:shadow-blue-500/50 transition-all duration-200"
-          >
-            <LinkedInIcon className="w-4 h-4 text-white group-hover:scale-110 transition-transform" />
-            <span>{t.linkedinButton}</span>
-            <ExternalLink className="w-3.5 h-3.5 text-blue-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-          </motion.a>
-        </motion.div>
-
         {/* Clean Footer tagline */}
-        <footer className="mt-3 p-3 rounded-xl bg-slate-900/30 border border-slate-800/50 text-center text-xs text-slate-500 flex items-center justify-between">
+        <footer className="mt-6 p-3 rounded-xl bg-slate-900/30 border border-slate-800/50 text-center text-xs text-slate-500 flex items-center justify-between">
           <span className="flex items-center gap-1.5 text-[11px]">
             <ShieldCheck className="w-3.5 h-3.5 text-indigo-400" />
             {t.footerTagline}
