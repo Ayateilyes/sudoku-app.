@@ -12,6 +12,11 @@ export const translations = {
     // Language Toggle
     langButton: 'Sprache wechseln',
 
+    // Developer & LinkedIn
+    developedBy: 'Entwickelt von',
+    developerName: 'Ayyat Ilyes',
+    linkedinButton: 'LinkedIn Profil',
+
     // Roulette effect
     rouletteBadge: 'Mausrad-Roulette aktiv',
     rouletteTooltip: 'Drehe das Mausrad über einem Feld, um Zahlen wie im Roulette durchzuschalten',
@@ -84,6 +89,11 @@ export const translations = {
 
     // Language Toggle
     langButton: 'Change language',
+
+    // Developer & LinkedIn
+    developedBy: 'Developed by',
+    developerName: 'Ayyat Ilyes',
+    linkedinButton: 'LinkedIn Profile',
 
     // Roulette effect
     rouletteBadge: 'Scroll Roulette Active',

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, CheckCircle2, ShieldCheck, Flame } from 'lucide-react';
+import { Sparkles, CheckCircle2, ShieldCheck, Flame, ExternalLink, Code2 } from 'lucide-react';
 import {
   BoardMatrix,
   Position,
@@ -24,6 +24,19 @@ import { SolveBar, PlaybackSpeed } from './components/SolveBar';
 import { DifficultySelector } from './components/DifficultySelector';
 import { VictoryModal } from './components/VictoryModal';
 import { DailyStreakCard } from './components/DailyStreakCard';
+
+function LinkedInIcon({ className = 'w-4 h-4' }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z" />
+    </svg>
+  );
+}
 
 interface HealthResponse {
   status: string;
@@ -784,8 +797,44 @@ export default function App() {
           onClose={() => setIsVictory(false)}
         />
 
-        {/* Clean Footer banner */}
-        <footer className="mt-6 p-3 rounded-xl bg-slate-900/40 border border-slate-800/60 text-center text-xs text-slate-500 flex items-center justify-between">
+        {/* Developer Credit & LinkedIn Connect Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15, duration: 0.35 }}
+          className="mt-6 p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-slate-900/90 via-indigo-950/40 to-slate-900/90 backdrop-blur-xl border border-indigo-500/30 shadow-xl shadow-indigo-950/40 flex flex-col sm:flex-row items-center justify-between gap-3"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500/25 via-purple-500/20 to-pink-500/25 border border-indigo-400/40 flex items-center justify-center text-indigo-300 shadow-md shadow-indigo-950/50">
+              <Code2 className="w-5 h-5 text-indigo-400" />
+            </div>
+            <div className="text-center sm:text-left">
+              <div className="text-[11px] text-indigo-300/80 font-medium flex items-center justify-center sm:justify-start gap-1.5">
+                <span>{t.developedBy}</span>
+                <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              </div>
+              <div className="text-sm font-black text-white tracking-wide">
+                Ayyat Ilyes
+              </div>
+            </div>
+          </div>
+
+          <motion.a
+            href="https://www.linkedin.com/in/ayyat-ilyes/?locale=de-DE"
+            target="_blank"
+            rel="noopener noreferrer"
+            whileHover={{ scale: 1.05, y: -1 }}
+            whileTap={{ scale: 0.96 }}
+            className="group relative inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-[#0A66C2] via-indigo-600 to-[#0A66C2] hover:from-[#0077B5] hover:to-indigo-500 border border-blue-400/40 shadow-lg shadow-blue-600/30 hover:shadow-blue-500/50 transition-all duration-200"
+          >
+            <LinkedInIcon className="w-4 h-4 text-white group-hover:scale-110 transition-transform" />
+            <span>{t.linkedinButton}</span>
+            <ExternalLink className="w-3.5 h-3.5 text-blue-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+          </motion.a>
+        </motion.div>
+
+        {/* Clean Footer tagline */}
+        <footer className="mt-3 p-3 rounded-xl bg-slate-900/30 border border-slate-800/50 text-center text-xs text-slate-500 flex items-center justify-between">
           <span className="flex items-center gap-1.5 text-[11px]">
             <ShieldCheck className="w-3.5 h-3.5 text-indigo-400" />
             {t.footerTagline}

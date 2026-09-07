@@ -3,8 +3,10 @@
 <div align="center">
 
 [![Live Demo](https://img.shields.io/badge/Live_Demo-sudoku--app--rust.vercel.app-00E599?style=for-the-badge&logo=vercel&logoColor=white)](https://sudoku-app-rust.vercel.app/)
+[![Developed by Ayyat Ilyes](https://img.shields.io/badge/Developed_by-Ayyat_Ilyes-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/ayyat-ilyes/?locale=de-DE)
 
 ### 🎮 **Live App**: [Sudoku Master & Daily Challenge](https://sudoku-app-rust.vercel.app/)
+### 👨‍💻 **Entwickler / Developer**: [Ayyat Ilyes | LinkedIn](https://www.linkedin.com/in/ayyat-ilyes/?locale=de-DE)
 
 [![React](https://img.shields.io/badge/React-18.x-61DAFB?logo=react&logoColor=black)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-6.x-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
@@ -293,6 +295,12 @@ npm run dev
 | `POST` | `/api/streak/complete` | Updates consecutive daily streak upon challenge completion |
 | `POST` | `/api/solve` | Executes backtracking solver; returns solution and playback steps |
 | `POST` | `/api/hint` | Calculates and returns the correct value for target/optimal cell |
+
+---
+
+## 👨‍💻 Entwickler / Developer
+Entwickelt von / Developed by **Ayyat Ilyes**.
+- 🔗 **LinkedIn**: [Ayyat Ilyes | LinkedIn](https://www.linkedin.com/in/ayyat-ilyes/?locale=de-DE)
 
 ---
 
