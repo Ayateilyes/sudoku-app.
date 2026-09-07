@@ -2,6 +2,10 @@
 
 <div align="center">
 
+[![Live Demo](https://img.shields.io/badge/Live_Demo-sudoku--app--rust.vercel.app-00E599?style=for-the-badge&logo=vercel&logoColor=white)](https://sudoku-app-rust.vercel.app/)
+
+### 🎮 **Live App**: [Sudoku Master & Daily Challenge](https://sudoku-app-rust.vercel.app/)
+
 [![React](https://img.shields.io/badge/React-18.x-61DAFB?logo=react&logoColor=black)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-6.x-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -19,6 +23,8 @@
 ## 🇩🇪 Deutsch
 
 Eine moderne Full-Stack-Sudoku-Webanwendung mit Echtzeit-Konfliktvalidierung, animiertem Backtracking-Solver, intelligentem Hinweis-System, verschiedenen Schwierigkeitsstufen und täglichen Herausforderungen mit Streak-Tracking über Spieler-Nicknames.
+
+> 🔗 **Live-Version im Browser spielen**: [Sudoku Master & Daily Challenge](https://sudoku-app-rust.vercel.app/)
 
 ### ✨ Funktionen
 
@@ -126,7 +132,7 @@ npm run dev
    - `DIRECT_URL` = *(Dein direkter Neon-Verbindungsstring)*
    - `PORT` = `3001`
    - `HOST` = `0.0.0.0`
-4. Den Dienst bereitstellen.
+4. Den Dienst bereitstellen (z. B. unter `https://sudoku-app-2kgt.onrender.com`).
 
 #### Frontend auf Vercel
 1. Auf Vercel **Add New > Project** wählen und dieses Repository importieren.
@@ -134,8 +140,8 @@ npm run dev
    - **Framework Preset**: `Vite`
    - **Root Directory**: `client`
 3. Unter **Environment Variables** hinzufügen:
-   - `VITE_API_URL` = `https://dein-render-service.onrender.com` *(Render-Backend-URL ohne Schrägstrich am Ende)*
-4. Auf **Deploy** klicken.
+   - `VITE_API_URL` = `https://sudoku-app-2kgt.onrender.com`
+4. Auf **Deploy** klicken (Bereitgestellt unter [https://sudoku-app-rust.vercel.app/](https://sudoku-app-rust.vercel.app/)).
 
 ### 🔌 REST-API-Dokumentation
 
@@ -155,6 +161,8 @@ npm run dev
 ## 🇬🇧 English
 
 A modern, full-stack Sudoku web application featuring real-time conflict validation, animated backtracking solver, intelligent hints, difficulty pools, and date-seeded daily challenges with nickname streak tracking.
+
+> 🔗 **Play Live in Browser**: [Sudoku Master & Daily Challenge](https://sudoku-app-rust.vercel.app/)
 
 ### ✨ Features
 
@@ -262,7 +270,7 @@ npm run dev
    - `DIRECT_URL` = *(Your Neon direct connection string)*
    - `PORT` = `3001`
    - `HOST` = `0.0.0.0`
-4. Deploy the service.
+4. Deploy the service (e.g. `https://sudoku-app-2kgt.onrender.com`).
 
 #### Frontend on Vercel
 1. In Vercel, click **Add New > Project** and import this repository.
@@ -270,8 +278,8 @@ npm run dev
    - **Framework Preset**: `Vite`
    - **Root Directory**: `client`
 3. Under **Environment Variables**, add:
-   - `VITE_API_URL` = `https://your-render-service.onrender.com` *(Your Render backend URL without trailing slash)*
-4. Click **Deploy**.
+   - `VITE_API_URL` = `https://sudoku-app-2kgt.onrender.com`
+4. Click **Deploy** (Deployed at [https://sudoku-app-rust.vercel.app/](https://sudoku-app-rust.vercel.app/)).
 
 ### 🔌 REST API Documentation
 
